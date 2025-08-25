@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 
 import connectDB from "./utils/db.js";
 import userRoutes from "./routes/userRoutes.js";
+import channelRoutes from "./routes/channelRoutes.js";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ connectDB();
 
 //Routes
 app.use("/api", userRoutes);
+app.use("/api", channelRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
