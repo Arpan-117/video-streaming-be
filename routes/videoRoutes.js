@@ -5,6 +5,9 @@ const router = express.Router();
 
 // VIDEO ROUTES
 // Upload/Create Video
-router.post("/upload", verifyToken)
+router.post("/upload", verifyToken);
+
+// Delete Video
+// Update Video Details
 
 export default router;

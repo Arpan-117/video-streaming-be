@@ -10,4 +10,6 @@ router.post("/register", registerUser);
 // User Login
 router.post("/login", loginUser)
 
+// Delete Account
+
 export default router;

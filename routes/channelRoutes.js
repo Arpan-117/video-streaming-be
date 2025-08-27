@@ -8,4 +8,9 @@ const router = express.Router();
 // Create Channel
 router.post("/create-channel", verifyToken, createChannel);
 
+// Delete Channel
+// Update Channel Details
+// Get all videos from channel
+// Delete all videos from channel
+
 export default router;
