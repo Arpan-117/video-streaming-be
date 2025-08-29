@@ -1,6 +1,6 @@
 import express from "express";
 import { verifyToken } from "../middlewares/verifyToken.js";
-import { createChannel } from "../controllers/channelController.js";
+import { createChannel, getChannelDetails } from "../controllers/channelController.js";
 
 const router = express.Router();
 
@@ -8,9 +8,12 @@ const router = express.Router();
 // Create Channel
 router.post("/create-channel", verifyToken, createChannel);
 
-// Delete Channel
-// Update Channel Details
-// Get all videos from channel
-// Delete all videos from channel
+// Delete Channel (only channel owner can delete)
+// Update Channel Details (only channel owner can update)
+
+// Get all videos from channel (for channel owner and other users)
+router.get("/channel-details/:channelId", getChannelDetails);
+
+// Delete all videos from channel (only channel owner can delete)
 
 export default router;

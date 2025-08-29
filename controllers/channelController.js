@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import ChannelModel from "../models/channelModel.js";
 import UserModel from "../models/userModel.js";
+import VideoModel from "../models/videoModel.js";
 
 const createChannel = async (req, res) => {
     const session = await mongoose.startSession();
@@ -40,4 +41,25 @@ const createChannel = async (req, res) => {
     }
 }
 
-export { createChannel };
+// Get channel details (channel details and videos)
+const getChannelDetails = async(req, res) => {
+    try {
+        const channel = req.params.channelId;
+        const channelDetails = await ChannelModel.findById(channel);
+        let details;
+        if (!channelDetails) {
+            return res.status(404).json({ message: "Channel not found" });
+        }
+        const videos = await VideoModel.find({ channel: channel });
+        if (!videos) {
+            details = { channelDetails, videos: [] };
+        } else {
+            details = { channelDetails, videos };
+        }
+        return res.status(200).json({ message: "Channel details fetched successfully", details });
+    } catch (err) {
+        return res.status(500).json({ message: "Internal server error - getChannelDetails", error: err.message });
+    }
+}
+
+export { createChannel, getChannelDetails };
