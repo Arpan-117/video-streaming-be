@@ -1,4 +1,6 @@
+import mongoose from "mongoose";
 import VideoModel from "../models/videoModel.js";
+import UserModel from "../models/userModel.js";
 
 const uploadVideo = async (req, res) => {
     try {
@@ -86,4 +88,77 @@ const editVideoDetails = async (req, res) => {
     }
 }
 
-export { uploadVideo, editVideoDetails }
+const viewVideo = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        const videoId = req.params.videoId;
+        const video = await VideoModel.findById(videoId);
+        if (!video) {
+            session.abortTransaction();
+            session.endSession();
+            return res.status(404).json({ message: "Video not found" });
+        }
+        await VideoModel.findByIdAndUpdate(videoId,
+            { $inc: { views: 1 } },
+            { returnDocument: "after" },
+            { session }
+        );
+        await session.commitTransaction();
+        session.endSession();
+
+        return res.status(200).json({ message: "Video viewed successfully", video });
+    } catch (err) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(500).json({ message: "Internal server error - viewVideo", error: err.message });
+    }
+}
+
+const likeVideo = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        const videoId = req.params.videoId;
+        const userId = req.user.id;
+        const video = await VideoModel.findById(videoId);
+        if (!video) {
+            session.abortTransaction();
+            session.endSession();
+            return res.status(404).json({ message: "Video not found" });
+        }
+        // check if user already liked the video
+        const userDetails = await UserModel.findById(userId);
+        const likedVideo = userDetails.likedVideos.includes(videoId);
+        if (likedVideo) {
+            await UserModel.findByIdAndUpdate(userId,
+                { $pull: { likedVideos: videoId } },
+                { session }
+            );
+            await VideoModel.findByIdAndUpdate(videoId,
+                { $inc: { likes: -1 } },
+                { session }
+            );
+        } else {
+            await UserModel.findByIdAndUpdate(userId,
+                { $push: { likedVideos: videoId } },
+                { session }
+            );
+            await VideoModel.findByIdAndUpdate(videoId,
+                { $inc: { likes: 1 } },
+                { session }
+            );
+        }
+
+        await session.commitTransaction();
+        session.endSession();
+
+        return res.status(200).json({ message: "Video liked successfully", video });
+    } catch (err) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(500).json({ message: "Internal server error - handleVideoLike", error: err.message });
+    }
+}
+
+export { uploadVideo, editVideoDetails, viewVideo, likeVideo }

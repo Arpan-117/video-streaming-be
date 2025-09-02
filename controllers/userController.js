@@ -47,6 +47,6 @@ const loginUser = async (req, res) => {
     } catch(err) {
         return res.status(500).json({ message: "Internal server error while logging in user", error: err.message });
     }
-} 
+}
 
 export { registerUser, loginUser };

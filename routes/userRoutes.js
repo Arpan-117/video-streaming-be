@@ -8,8 +8,9 @@ const router = express.Router();
 router.post("/register", registerUser);
 
 // User Login
-router.post("/login", loginUser)
+router.post("/login", loginUser);
 
-// Delete Account
+// Delete Account (only user can delete)
+// Update Account Details (only user can update)
 
 export default router;
