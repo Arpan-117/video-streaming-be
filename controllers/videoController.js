@@ -99,15 +99,58 @@ const viewVideo = async (req, res) => {
             session.endSession();
             return res.status(404).json({ message: "Video not found" });
         }
-        await VideoModel.findByIdAndUpdate(videoId,
+        const viewedVideo = await VideoModel.findByIdAndUpdate(videoId,
             { $inc: { views: 1 } },
-            { returnDocument: "after" },
+            { returnOriginal: false },
             { session }
         );
         await session.commitTransaction();
         session.endSession();
 
-        return res.status(200).json({ message: "Video viewed successfully", video });
+        return res.status(200).json({ message: "Video viewed successfully", viewedVideo });
+    } catch (err) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(500).json({ message: "Internal server error - viewVideo", error: err.message });
+    }
+}
+
+const watchVideo = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        const videoId = req.params.videoId;
+        const userId = req.user.id;
+        let isLiked, isDisliked;
+        const video = await VideoModel.findById(videoId);
+        if (!video) {
+            session.abortTransaction();
+            session.endSession();
+            return res.status(404).json({ message: "Video not found" });
+        }
+        const viewedVideo = await VideoModel.findByIdAndUpdate(videoId,
+            { $inc: { views: 1 } },
+            { returnOriginal: false },
+            { session }
+        );
+        const userDetails = await UserModel.findById(userId);
+        const liked = userDetails.likedVideos.includes(videoId);
+        const disliked = userDetails.dislikedVideos.includes(videoId);
+        if (liked) {
+            isLiked = true;
+        } else {
+            isLiked = false;
+        }
+        if (disliked) {
+            isDisliked = true;
+        } else {
+            isDisliked = false;
+        }
+        const details = { viewedVideo, isLiked, isDisliked };
+        await session.commitTransaction();
+        session.endSession();
+
+        return res.status(200).json({ message: "Video viewed successfully", details });
     } catch (err) {
         await session.abortTransaction();
         session.endSession();
@@ -161,4 +204,4 @@ const likeVideo = async (req, res) => {
     }
 }
 
-export { uploadVideo, editVideoDetails, viewVideo, likeVideo }
+export { uploadVideo, editVideoDetails, viewVideo, watchVideo, likeVideo }
