@@ -158,6 +158,7 @@ const watchVideo = async (req, res) => {
     }
 }
 
+// Working, just need to return the latest video details after update
 const likeVideo = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -171,15 +172,17 @@ const likeVideo = async (req, res) => {
             return res.status(404).json({ message: "Video not found" });
         }
         // check if user already liked the video
+        let updatedVideo;
         const userDetails = await UserModel.findById(userId);
-        const likedVideo = userDetails.likedVideos.includes(videoId);
+        const likedVideo = await userDetails.likedVideos.includes(videoId);
         if (likedVideo) {
             await UserModel.findByIdAndUpdate(userId,
                 { $pull: { likedVideos: videoId } },
                 { session }
             );
-            await VideoModel.findByIdAndUpdate(videoId,
+            updatedVideo = await VideoModel.findByIdAndUpdate(videoId,
                 { $inc: { likes: -1 } },
+                { returnOriginal: false },
                 { session }
             );
         } else {
@@ -187,8 +190,9 @@ const likeVideo = async (req, res) => {
                 { $push: { likedVideos: videoId } },
                 { session }
             );
-            await VideoModel.findByIdAndUpdate(videoId,
+            updatedVideo = await VideoModel.findByIdAndUpdate(videoId,
                 { $inc: { likes: 1 } },
+                { returnOriginal: false },
                 { session }
             );
         }
@@ -196,12 +200,60 @@ const likeVideo = async (req, res) => {
         await session.commitTransaction();
         session.endSession();
 
-        return res.status(200).json({ message: "Video liked successfully", video });
+        return res.status(200).json({ message: "Video liked successfully", updatedVideo });
     } catch (err) {
         await session.abortTransaction();
         session.endSession();
-        return res.status(500).json({ message: "Internal server error - handleVideoLike", error: err.message });
+        return res.status(500).json({ message: "Internal server error - likeVideo", error: err.message });
     }
 }
 
-export { uploadVideo, editVideoDetails, viewVideo, watchVideo, likeVideo }
+const dislikeVideo = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        const videoId = req.params.videoId;
+        const userId = req.user.id;
+        const video = await VideoModel.findById(videoId);
+        if (!video) {
+            session.abortTransaction();
+            session.endSession();
+            return res.status(404).json({ message: "Video not found" });
+        }
+        // check if user already disliked the video
+        let updatedVideo;
+        const userDetails = await UserModel.findById(userId);
+        const dislikedVideo = await userDetails.dislikedVideos.includes(videoId);
+        if (dislikedVideo) {
+            await UserModel.findByIdAndUpdate(userId,
+                { $pull: { dislikedVideos: videoId } },
+                { session }
+            );
+            updatedVideo = await VideoModel.findByIdAndUpdate(videoId,
+                { $inc: { dislikes: -1 } },
+                { returnOriginal: false },
+                { session }
+            );
+        } else {
+            await UserModel.findByIdAndUpdate(userId,
+                { $push: { dislikedVideos: videoId } },
+                { session }
+            );
+            updatedVideo = await VideoModel.findByIdAndUpdate(videoId,
+                { $inc: { dislikes: 1 } },
+                { returnOriginal: false },
+                { session }
+            );
+        }
+
+        await session.commitTransaction();
+        session.endSession();
+        return res.status(200).json({ message: "Video disliked successfully", updatedVideo });
+    } catch (err) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(500).json({ message: "Internal server error - dislikeVideo", error: err.message });
+    }
+}
+
+export { uploadVideo, editVideoDetails, viewVideo, watchVideo, likeVideo, dislikeVideo }

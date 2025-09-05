@@ -1,6 +1,6 @@
 import express from "express";
 import { verifyToken } from "../middlewares/verifyToken.js";
-import { uploadVideo, editVideoDetails, viewVideo, watchVideo, likeVideo } from "../controllers/videoController.js";
+import { uploadVideo, editVideoDetails, viewVideo, watchVideo, likeVideo, dislikeVideo } from "../controllers/videoController.js";
 
 const router = express.Router();
 
@@ -23,6 +23,7 @@ router.put("/video/update/:videoId", verifyToken, editVideoDetails);
 router.put("/video/like/:videoId", verifyToken, likeVideo);
 
 // Dislike/unDislike Video
+router.put("/video/dislike/:videoId", verifyToken, dislikeVideo);
 
 
 
