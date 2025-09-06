@@ -1,6 +1,6 @@
 import express from "express";
 import { verifyToken } from "../middlewares/verifyToken.js";
-import { uploadVideo, editVideoDetails, viewVideo, watchVideo, likeVideo, dislikeVideo } from "../controllers/videoController.js";
+import { uploadVideo, editVideoDetails, deleteVideo, viewVideo, watchVideo, likeVideo, dislikeVideo } from "../controllers/videoController.js";
 
 const router = express.Router();
 
@@ -9,6 +9,7 @@ const router = express.Router();
 router.post("/video/upload", verifyToken, uploadVideo);
 
 // Delete Video (only video owner can delete)
+router.delete("/video/delete/:videoId", verifyToken, deleteVideo)
 
 // Watch Video without login(comments, likes, dislikes, views)
 router.patch("/video/view/:videoId", viewVideo);

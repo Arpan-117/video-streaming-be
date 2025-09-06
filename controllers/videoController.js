@@ -88,6 +88,24 @@ const editVideoDetails = async (req, res) => {
     }
 }
 
+const deleteVideo = async (req, res) => {
+    try {
+        const videoId = req.params.videoId;
+        const userId = req.user.id;
+        const video = await VideoModel.findById(videoId);
+        if (!video) {
+            return res.status(404).json({ message: "Video not found" });
+        }
+        if (userId !== video.uploader.toString()) {
+            return res.status(403).json({ message: "You are not authorized to delete this video" });
+        }
+        const deletedVideo = await VideoModel.findByIdAndDelete(videoId);
+        return res.status(200).json({ message: "Video deleted successfully", deletedVideo });
+    } catch (err) {
+        return res.status(500).json({ message: "Internal server error - deleteVideo", error: err.message });
+    }
+}
+
 const viewVideo = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -256,4 +274,4 @@ const dislikeVideo = async (req, res) => {
     }
 }
 
-export { uploadVideo, editVideoDetails, viewVideo, watchVideo, likeVideo, dislikeVideo }
+export { uploadVideo, editVideoDetails, deleteVideo, viewVideo, watchVideo, likeVideo, dislikeVideo }
