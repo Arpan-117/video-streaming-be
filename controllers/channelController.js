@@ -41,6 +41,31 @@ const createChannel = async (req, res) => {
     }
 }
 
+const updateChannelDetails  = async (req, res) => {
+    try {
+        const channelId = req.params.channelId;
+        const userId = req.user.id;
+        const { channelName, channelDescription } = req.body;
+        const channel = await ChannelModel.findById(channelId);
+        if (!channel) {
+            return res.status(404).json({ message: "Channel not found" });
+        }
+        if (userId !== channel.owner.toString()) {
+            return res.status(403).json({ message: "You are not authorized to update this channel" });
+        }
+        if (channelName && channelName.trim() !== "") {
+            channel.channelName = channelName.trim();
+        }
+        if (channelDescription && channelDescription.trim() !== "") {
+            channel.channelDescription = channelDescription.trim();
+        }
+        const updateChannel = await channel.save();
+        return res.status(200).json({ message: "Channel details updated successfully", channel: updateChannel });
+    } catch (err) {
+        return res.status(500).json({ message: "Internal server error - updateChannelDetails", error: err.message });
+    }
+}
+
 // Get channel details (channel details and videos)
 const getChannelDetails = async(req, res) => {
     try {
@@ -62,4 +87,4 @@ const getChannelDetails = async(req, res) => {
     }
 }
 
-export { createChannel, getChannelDetails };
+export { createChannel, updateChannelDetails, getChannelDetails };
