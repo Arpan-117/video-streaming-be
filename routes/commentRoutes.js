@@ -1,0 +1,14 @@
+import express from "express";
+import { verifyToken } from "../middlewares/verifyToken.js";
+
+const router = express.Router();
+
+// Get all comments on video
+
+// Post a comment on video
+router.post("/comment/:videoId", verifyToken);
+
+// Delete comment on video
+// Update comment on video
+
+export default router;
