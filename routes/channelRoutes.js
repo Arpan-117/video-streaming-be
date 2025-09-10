@@ -1,6 +1,6 @@
 import express from "express";
 import { verifyToken } from "../middlewares/verifyToken.js";
-import { createChannel, updateChannelDetails, getChannelDetails } from "../controllers/channelController.js";
+import { createChannel, updateChannelDetails, getAllChannels, getChannelDetails } from "../controllers/channelController.js";
 
 const router = express.Router();
 
@@ -16,6 +16,7 @@ router.patch("/update-channel/:channelId", verifyToken, updateChannelDetails);
 // Select channel for owner
 
 // Get all channels of owner
+router.get("/channels", verifyToken, getAllChannels);
 
 // Get all videos from channel (for channel owner and other users)
 router.get("/channel-details/:channelId", getChannelDetails);

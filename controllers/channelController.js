@@ -66,6 +66,19 @@ const updateChannelDetails  = async (req, res) => {
     }
 }
 
+const getAllChannels = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const channels = await ChannelModel.find({ owner: userId });
+        if (!channels) {
+            return res.status(404).json({ message: "No channels found" });
+        }
+        return res.status(200).json({ message: "Channels fetched successfully", channels });
+    } catch (err) {
+        return res.status(500).json({ message: "Internal server error - getAllChannels", error: err.message });
+    }
+}
+
 // Get channel details (channel details and videos)
 const getChannelDetails = async(req, res) => {
     try {
@@ -87,4 +100,4 @@ const getChannelDetails = async(req, res) => {
     }
 }
 
-export { createChannel, updateChannelDetails, getChannelDetails };
+export { createChannel, updateChannelDetails, getAllChannels, getChannelDetails };
