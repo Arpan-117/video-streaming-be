@@ -2,6 +2,21 @@ import mongoose from "mongoose";
 import VideoModel from "../models/videoModel.js";
 import CommentsModel from "../models/commentsModel.js";
 
+const getAllComments = async (req, res) => {
+    try {
+        const videoId = req.params.videoId;
+        const comments = await CommentsModel.find({ videoId })
+        .populate("author", "username")
+        .sort({ date: -1 });
+        if (!comments || comments.length === 0) {
+            return res.status(404).json({ message: "Comments not found" });
+        }
+        return res.status(200).json({ message: "Comments fetched successfully", comments });
+    } catch (err) {
+        return res.status(500).json({ message: "Internal server error - getAllComments", error: err.message });
+    }
+}
+
 const postComment = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -40,4 +55,4 @@ const postComment = async (req, res) => {
     }
 }
 
-export { postComment };
+export { getAllComments, postComment };
