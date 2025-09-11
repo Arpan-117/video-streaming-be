@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import VideoModel from "../models/videoModel";
-import CommentsModel from "../models/commentsModel";
+import VideoModel from "../models/videoModel.js";
+import CommentsModel from "../models/commentsModel.js";
 
 const postComment = async (req, res) => {
     const session = await mongoose.startSession();
@@ -39,3 +39,5 @@ const postComment = async (req, res) => {
         return res.status(500).json({ message: "Internal server error - postComment", error: err.message });
     }
 }
+
+export { postComment };
