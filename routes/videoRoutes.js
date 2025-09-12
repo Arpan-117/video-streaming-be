@@ -26,6 +26,4 @@ router.put("/video/like/:videoId", verifyToken, likeVideo);
 // Dislike/unDislike Video
 router.put("/video/dislike/:videoId", verifyToken, dislikeVideo);
 
-
-
 export default router;
